@@ -46,11 +46,12 @@ import java.util.logging.Logger
  * load from there.
  *
  * @author Aivar Grislis
+ * @author Ruskonert (ruskonert@gmail.com)
  */
 object NativeLibraryUtil {
 
-    val DELIM = "/"
-    val DEFAULT_SEARCH_PATH = "natives$DELIM"
+    const val DELIM = "/"
+    private const val DEFAULT_SEARCH_PATH = "natives$DELIM"
 
     private var architecture = Architecture.UNKNOWN
     private var archStr: String? = null

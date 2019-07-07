@@ -50,7 +50,7 @@ import java.io.IOException
  * more than one classloader.
  *
  * @author Richard van der Hoff (richardv@mxtelecom.com)
- * @author Ruskonert (Ruskonert@gmail.com)
+ * @author Ruskonert (ruskonert@gmail.com)
  */
 class DefaultJniExtractor
 @Throws(IOException::class) constructor(libraryJarClass: Class<*>?) : BaseJniExtractor(libraryJarClass) {

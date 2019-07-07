@@ -44,7 +44,7 @@ import java.io.IOException
 
 /**
  * @author Richard van der Hoff (richardv@mxtelecom.com)
- * @author Ruskonert (Ruskonert@gmail.com)
+ * @author Ruskonert (ruskonert@gmail.com)
  */
 interface JniExtractor {
 

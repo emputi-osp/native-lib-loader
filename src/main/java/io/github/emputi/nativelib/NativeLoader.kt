@@ -4,6 +4,9 @@
  * %%
  * Copyright (C) 2010 - 2015 Board of Regents of the University of
  * Wisconsin-Madison and Glencoe Software, Inc.
+ *
+ * Copyright (c) 2019, Ruskonert (Emputi Open-source project) All rights reserved.
+ *
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -77,6 +80,7 @@ import java.io.IOException
  * as above).
  *
  * @author Richard van der Hoff (richardv@mxtelecom.com)
+ * @author Ruskonert (ruskonert@gmail.com)
  */
 object NativeLoader {
     /**

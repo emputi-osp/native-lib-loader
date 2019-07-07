@@ -82,8 +82,8 @@ object MxSysInfo {
                 cxxver = if ("5" == libstdcxx_m.group(1)) {
                     "5"
                 } else if ("6" == libstdcxx_m.group(1)) {
-                    val minor_version = Integer.parseInt(libstdcxx_m.group(2))
-                    if (minor_version < 9) {
+                    val minorVersion = Integer.parseInt(libstdcxx_m.group(2))
+                    if (minorVersion < 9) {
                         "6"
                     } else {
                         "6" + libstdcxx_m.group(2)
