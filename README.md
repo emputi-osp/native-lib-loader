@@ -1,7 +1,7 @@
-[![](https://img.shields.io/maven-central/v/org.scijava/native-lib-loader.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.scijava%22%20AND%20a%3A%22native-lib-loader%22)
-[![](https://travis-ci.org/scijava/native-lib-loader.svg?branch=master)](https://travis-ci.org/scijava/native-lib-loader)
+[![](https://img.shields.io/badge/version-3.0.0-blue.svg)]()
+[![](https://travis-ci.org/emputi-osp/native-lib-loader.svg?branch=master)](https://travis-ci.org/emputi-osp/native-lib-loader)
 
-# About native library loader
+# About native library loader (Kotlin-rebased)
 
 The native library loader is a utility that assists with loading native
 libraries from Java. It provides the ability to painlessly identify, extract
@@ -21,8 +21,15 @@ Search Maven Central for [latest version](http://search.maven.org/#search|ga|1|a
 and add a dependency to your pom.xml.
 
 ```xml
+<repositories>
+    <repository>
+        <id>emputi-repo</id>
+        <url>https://repos.emputi.ml/</url>
+    </repository>
+</repositories>
+...
 <dependency>
-    <groupId>org.scijava</groupId>
+    <groupId>io.github.emputi</groupId>
     <artifactId>native-lib-loader</artifactId>
     <version>x.y.z</version>
 </dependency>

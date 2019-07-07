@@ -7,13 +7,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -34,82 +34,85 @@
 
 // Copyright 2009 MX Telecom Ltd
 
-package org.scijava.nativelib;
+package io.github.emputi.nativelib
 
-import java.io.File;
-import java.io.IOException;
+import java.io.File
+import java.io.IOException
 
 /**
  * JniExtractor suitable for multiple application deployments on the same
  * virtual machine (such as webapps)
- * <p>
+ *
+ *
  * Designed to avoid the restriction that jni library can be loaded by at most
  * one classloader at a time.
- * <p>
+ *
+ *
  * Works by extracting each library to a different location for each
  * classloader.
- * <p>
+ *
+ *
  * WARNING: This can expose strange and wonderful bugs in jni code. These bugs
  * generally stem from transitive dependencies of the jni library and can be
  * solved by linking these dependencies statically to form a single library
- * 
- * @author <a href="mailto:markjh@mxtelecom.com">markjh</a>
+ *
+ * @author [markjh](mailto:markjh@mxtelecom.com)
+ * @author Ruskonert (ruskonert@gmail.com)
+ *
  */
-public class WebappJniExtractor extends BaseJniExtractor {
+class WebappJniExtractor
 
-	private final File nativeDir;
-	private final File jniSubDir;
+/**
+ * @param classloaderName is a friendly name for your classloader which will
+ * be embedded in the directory name of the classloader-specific
+ * subdirectory which will be created.
+ */
+@Throws(IOException::class)
+constructor(classloaderName: String) : BaseJniExtractor() {
 
-	/**
-	 * @param classloaderName is a friendly name for your classloader which will
-	 *          be embedded in the directory name of the classloader-specific
-	 *          subdirectory which will be created.
-	 */
-	public WebappJniExtractor(final String classloaderName) throws IOException {
-		nativeDir = getTempDir();
-		// Order of operations is such thatwe do not error if we are racing with
-		// another thread to create the directory.
-		nativeDir.mkdirs();
-		if (!nativeDir.isDirectory()) {
-			throw new IOException(
-				"Unable to create native library working directory " + nativeDir);
-		}
+    override fun getJniDir(): File {
+        return this.webappJniDir
+    }
 
-		final long now = System.currentTimeMillis();
-		File trialJniSubDir;
-		int attempt = 0;
-		while (true) {
-			trialJniSubDir =
-				new File(nativeDir, classloaderName + "." + now + "." + attempt);
-			if (trialJniSubDir.mkdir()) break;
-			if (trialJniSubDir.exists()) {
-				attempt++;
-				continue;
-			}
-			throw new IOException(
-				"Unable to create native library working directory " + trialJniSubDir);
-		}
-		jniSubDir = trialJniSubDir;
-		jniSubDir.deleteOnExit();
-	}
+    override fun getNativeDir(): File {
+        return this.webappNativeDir
+    }
 
-	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		final File[] files = jniSubDir.listFiles();
-		for (final File file : files) {
-			file.delete();
-		}
-		jniSubDir.delete();
-	}
+    private val webappNativeDir: File = getTempDir()
+    private val webappJniDir: File
 
-	@Override
-	public File getJniDir() {
-		return jniSubDir;
-	}
+    init {
+        // Order of operations is such that we do not error if we are racing with
+        // another thread to create the directory.
+        webappNativeDir.mkdirs()
+        if (!webappNativeDir.isDirectory) {
+            throw IOException(
+                    "Unable to create native library working directory $webappNativeDir")
+        }
 
-	@Override
-	public File getNativeDir() {
-		return nativeDir;
-	}
+        val now = System.currentTimeMillis()
+        var trialJniSubDir: File
+        var attempt = 0
+        while (true) {
+            trialJniSubDir = File(webappNativeDir, "$classloaderName.$now.$attempt")
+            if (trialJniSubDir.mkdir()) break
+            if (trialJniSubDir.exists()) {
+                attempt++
+                continue
+            }
+            throw IOException(
+                    "Unable to create native library working directory $trialJniSubDir")
+        }
+        webappJniDir = trialJniSubDir
+        webappJniDir.deleteOnExit()
+    }
+
+    @Throws(Throwable::class)
+    protected fun finalize() {
+        val files = webappJniDir.listFiles()
+        for (file in files!!) {
+            file.delete()
+        }
+        webappJniDir.delete()
+    }
 }

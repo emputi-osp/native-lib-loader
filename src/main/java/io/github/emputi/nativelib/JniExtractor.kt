@@ -4,16 +4,19 @@
  * %%
  * Copyright (C) 2010 - 2015 Board of Regents of the University of
  * Wisconsin-Madison and Glencoe Software, Inc.
+ *
+ * Copyright (c) 2019, Ruskonert (Emputi Open-source project) All rights reserved.
+ *
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,19 +31,40 @@
  * #L%
  */
 
-package org.scijava.nativelib;
+// This code is derived from Richard van der Hoff's mx-native-loader project:
+// http://opensource.mxtelecom.com/maven/repo/com/wapmx/native/mx-native-loader/1.7/
+// See NOTICE.txt for details.
 
-import static org.junit.Assert.assertEquals;
+// Copyright 2006 MX Telecom Ltd
 
-import org.junit.Test;
+package io.github.emputi.nativelib
 
-public class NativeLibraryUtilTest {
+import java.io.File
+import java.io.IOException
 
-	@Test
-	public void ifNoVersionWasFoundLibraryNameIsReturned() throws Exception {
-		final String versionedLibraryName =
-			NativeLibraryUtil.getVersionedLibraryName(NativeLibraryUtil.class,
-				"native-lib-loader");
-		assertEquals("native-lib-loader", versionedLibraryName);
-	}
+/**
+ * @author Richard van der Hoff (richardv@mxtelecom.com)
+ * @author Ruskonert (Ruskonert@gmail.com)
+ */
+interface JniExtractor {
+
+    /**
+     * Extract a JNI library from the classpath to a temporary file.
+     *
+     * @param libPath library path
+     * @param libname System.loadLibrary() compatible library name
+     * @return the extracted file
+     * @throws IOException when extracting the desired file failed
+     */
+    @Throws(IOException::class)
+    fun extractJni(libPath: String, libname: String): File?
+
+    /**
+     * Extract all libraries which are registered for auto-extraction to files in
+     * the temporary directory.
+     *
+     * @throws IOException when extracting the desired file failed
+     */
+    @Throws(IOException::class)
+    fun extractRegistered()
 }

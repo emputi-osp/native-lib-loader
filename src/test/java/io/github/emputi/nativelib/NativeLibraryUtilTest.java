@@ -4,6 +4,9 @@
  * %%
  * Copyright (C) 2010 - 2015 Board of Regents of the University of
  * Wisconsin-Madison and Glencoe Software, Inc.
+ *
+ * Copyright (c) 2019, Ruskonert (Emputi Open-source project) All rights reserved.
+ *
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,54 +31,17 @@
  * #L%
  */
 
-// This code is derived from Richard van der Hoff's mx-native-loader project:
-// http://opensource.mxtelecom.com/maven/repo/com/wapmx/native/mx-native-loader/1.7/
-// See NOTICE.txt for details.
+package io.github.emputi.nativelib;
 
-// Copyright 2009 MX Telecom Ltd
+import org.junit.Test;
 
-package org.scijava.nativelib;
+import static org.junit.Assert.assertEquals;
 
-import java.io.File;
-import java.io.IOException;
+public class NativeLibraryUtilTest {
 
-/**
- * JniExtractor suitable for single application deployments per virtual machine
- * <p>
- * WARNING: This extractor can result in UnsatisifiedLinkError if it is used in
- * more than one classloader.
- * 
- * @author Richard van der Hoff (richardv@mxtelecom.com)
- */
-public class DefaultJniExtractor extends BaseJniExtractor {
-
-	/**
-	 * this is where native dependencies are extracted to (e.g. tmplib/).
-	 */
-	private File nativeDir;
-
-	public DefaultJniExtractor(final Class<?> libraryJarClass) throws IOException {
-		super(libraryJarClass);
-
-		nativeDir = getTempDir();
-		// Order of operations is such that we do not error if we are racing with
-		// another thread to create the directory.
-		nativeDir.mkdirs();
-		if (!nativeDir.isDirectory()) {
-			throw new IOException(
-				"Unable to create native library working directory " + nativeDir);
-		}
-		nativeDir.deleteOnExit();
+	@Test
+	public void ifNoVersionWasFoundLibraryNameIsReturned() {
+		final String versionedLibraryName = NativeLibraryUtil.getVersionedLibraryName(NativeLibraryUtil.class, "native-lib-loader");
+		assertEquals("native-lib-loader", versionedLibraryName);
 	}
-
-	@Override
-	public File getJniDir() {
-		return nativeDir;
-	}
-
-	@Override
-	public File getNativeDir() {
-		return nativeDir;
-	}
-
 }

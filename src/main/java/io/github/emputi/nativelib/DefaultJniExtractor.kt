@@ -4,16 +4,19 @@
  * %%
  * Copyright (C) 2010 - 2015 Board of Regents of the University of
  * Wisconsin-Madison and Glencoe Software, Inc.
+ *
+ * Copyright (c) 2019, Ruskonert (Emputi Open-source project) All rights reserved.
+ *
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -34,31 +37,45 @@
 
 // Copyright 2006 MX Telecom Ltd
 
-package org.scijava.nativelib;
+package io.github.emputi.nativelib
 
-import java.io.File;
-import java.io.IOException;
+import java.io.File
+import java.io.IOException
 
 /**
+ * JniExtractor suitable for single application deployments per virtual machine
+ *
+ *
+ * WARNING: This extractor can result in UnsatisifiedLinkError if it is used in
+ * more than one classloader.
+ *
  * @author Richard van der Hoff (richardv@mxtelecom.com)
+ * @author Ruskonert (Ruskonert@gmail.com)
  */
-public interface JniExtractor {
+class DefaultJniExtractor
+@Throws(IOException::class) constructor(libraryJarClass: Class<*>?) : BaseJniExtractor(libraryJarClass) {
 
-	/**
-	 * Extract a JNI library from the classpath to a temporary file.
-	 *
-	 * @param libPath library path
-	 * @param libname System.loadLibrary() compatible library name
-	 * @return the extracted file
-	 * @throws IOException when extracting the desired file failed
-	 */
-	public File extractJni(String libPath, String libname) throws IOException;
+    /**
+     * this is where native dependencies are extracted to (e.g. tmplib/).
+     */
+    private val nativeDir: File = getTempDir()
+    init {
 
-	/**
-	 * Extract all libraries which are registered for auto-extraction to files in
-	 * the temporary directory.
-	 * 
-	 * @throws IOException when extracting the desired file failed
-	 */
-	public void extractRegistered() throws IOException;
+        // Order of operations is such that we do not error if we are racing with
+        // another thread to create the directory.
+        nativeDir.mkdirs()
+        if (!nativeDir.isDirectory) {
+            throw IOException("Unable to create native library working directory $nativeDir")
+        }
+        nativeDir.deleteOnExit()
+    }
+
+    override fun getJniDir(): File {
+        return nativeDir
+    }
+
+    override fun getNativeDir(): File {
+        return nativeDir
+    }
+
 }

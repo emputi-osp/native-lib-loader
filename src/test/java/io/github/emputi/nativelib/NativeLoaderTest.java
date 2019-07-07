@@ -4,6 +4,9 @@
  * %%
  * Copyright (C) 2010 - 2015 Board of Regents of the University of
  * Wisconsin-Madison and Glencoe Software, Inc.
+ *
+ * Copyright (c) 2019, Ruskonert (Emputi Open-source project) All rights reserved.
+ *
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,9 +31,11 @@
  * #L%
  */
 
-package org.scijava.nativelib;
+package io.github.emputi.nativelib;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,31 +44,29 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.jar.*;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import static org.junit.Assert.assertEquals;
 
 public class NativeLoaderTest {
 
 	@Rule
 	public TemporaryFolder tmpTestDir = new TemporaryFolder();
 
-	// Creates a temporary jar with a dummy lib in it for testing extractiong
+	// Creates a temporary jar with a dummy lib in it for testing extraction.
 	private void createJar() throws Exception {
 		// create a jar file...
 		File dummyJar = tmpTestDir.newFile("dummy.jar");
 		Manifest manifest = new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-		JarOutputStream target = null;
-		try {
-			target = new JarOutputStream(new FileOutputStream(dummyJar), manifest);
-
+		try (JarOutputStream target = new JarOutputStream(new FileOutputStream(dummyJar), manifest)) {
 			// with a dummy binary in it
 			File source = new File(String.format("natives/%s/%s",
-				NativeLibraryUtil.getArchitecture().name().toLowerCase(),
-				NativeLibraryUtil.getPlatformLibraryName("dummy")));
+					NativeLibraryUtil.getArchitecture().name().toLowerCase(),
+					NativeLibraryUtil.getPlatformLibraryName("dummy")));
 			JarEntry entry = new JarEntry(source.getPath().replace("\\", "/"));
 			entry.setTime(System.currentTimeMillis());
 			target.putNextEntry(entry);
@@ -72,14 +75,12 @@ public class NativeLoaderTest {
 			byte[] buffer = "native-lib-loader".getBytes();
 			target.write(buffer, 0, buffer.length);
 			target.closeEntry();
-		} finally {
-			if (target != null) { target.close(); }
 		}
 
 		// and add to classpath as if it is a dependency of the project
-		Method addURLMethod = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
+		Method addURLMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 		addURLMethod.setAccessible(true);
-		addURLMethod.invoke(ClassLoader.getSystemClassLoader(), new Object[]{ dummyJar.toURI().toURL() });
+		addURLMethod.invoke(ClassLoader.getSystemClassLoader(), dummyJar.toURI().toURL());
 	}
 
 	@Test(expected = IOException.class)
@@ -96,18 +97,14 @@ public class NativeLoaderTest {
 		createJar();
 		// see if dummy is correctly extracted
 		JniExtractor jniExtractor = new DefaultJniExtractor(null);
-		String libPath = String.format("natives/%s",
-				NativeLibraryUtil.getArchitecture().name().toLowerCase());
+		String libPath = String.format("natives/%s", NativeLibraryUtil.getArchitecture().name().toLowerCase());
 		File extracted = jniExtractor.extractJni(libPath + "", "dummy");
 
-		FileInputStream in = null;
-		try {
-			in = new FileInputStream(extracted);
+		assert extracted != null;
+		try (FileInputStream in = new FileInputStream(extracted)) {
 			byte[] buffer = new byte[32];
 			in.read(buffer, 0, buffer.length);
-			assertTrue(new String(buffer).trim().equals("native-lib-loader"));
-		} finally {
-			if (in != null) { in.close(); }
+			assertEquals("native-lib-loader", new String(buffer).trim());
 		}
 	}
 }
